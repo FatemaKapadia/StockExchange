@@ -1,0 +1,3 @@
+Amazon 500 0
+IBM 0 100
+Amazon 500 450

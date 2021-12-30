@@ -1,0 +1,5 @@
+Amazon 500 Trading-Global-Inc Buy Limit 
+Sleep 1000
+IBM 100 Trading-Global-Inc Sell IOC
+Sleep 500
+Amazon 450 MoneyMaker-Sync Sell Market

@@ -1,8 +1,12 @@
 package StockExchange;
 
+import java.util.*;
+
 public class Quote {
     private String stockName;
     private int bestBuyPrice, bestSellPrice;
+    private ArrayList<SellOrder> sellOrders;
+    private ArrayList<BuyOrder> buyOrders;
 
     public Quote(String name) {
         stockName = name;
@@ -39,5 +43,47 @@ public class Quote {
 
     public int getBestSellPrice() {
         return bestSellPrice;
+    }
+
+    public void addSellOrder(SellOrder so) {
+        sellOrders.add(so);
+    }
+
+    public void addBuyOrder(BuyOrder bo) {
+        buyOrders.add(bo);
+    }
+
+    public void sortSellOrderList() {
+        sellOrders.sort((order1, order2) -> {
+            if (order1.getType().equals("Market")) {
+                return 1;
+            } else if (order2.getType().equals("Market")) {
+                return -1;
+            } else if (order1.getPrice() < order2.getPrice()) {
+                return 1;
+            } else if (order1.getPrice() > order2.getPrice()) {
+                return -1;
+            } else if (order1.getType().equals("IOC")) {
+                return 1;
+            }
+            return -1;
+        });
+    }
+
+    public void sortBuyOrderList() {
+        buyOrders.sort((order1, order2) -> {
+            if (order1.getType().equals("Market")) {
+                return 1;
+            } else if (order2.getType().equals("Market")) {
+                return -1;
+            } else if (order1.getPrice() > order2.getPrice()) {
+                return 1;
+            } else if (order1.getPrice() < order2.getPrice()) {
+                return -1;
+            } else if (order1.getType().equals("IOC")) {
+                return 1;
+            }
+            return -1;
+        });
     }
 }

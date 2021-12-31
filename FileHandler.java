@@ -109,21 +109,26 @@ public class FileHandler implements Runnable {
 
         // in case company is not registered, create a new entry in the HashMap
         exchange.isStockRegistered(companyName);
+        Quote currentCompany = exchange.getQuote(companyName);
 
         if (direction.equals("Buy")) {
-            Order newBuyOrder = new BuyOrder(companyName, price, tradingPartyName, type);
-            if (exchange.getQuote(companyName).updateBuyPrice(price)) {
+            BuyOrder newBuyOrder = new BuyOrder(companyName, price, tradingPartyName, type);
+            if (currentCompany.updateBuyPrice(price)) {
                 isQuoteUpdated = true;
             }
+            currentCompany.addBuyOrder(newBuyOrder);
+            currentCompany.sortBuyOrderList();
         } else {
-            Order newSellOrder = new SellOrder(companyName, price, tradingPartyName, type);
-            if (exchange.getQuote(companyName).updateSellPrice(price)) {
+            SellOrder newSellOrder = new SellOrder(companyName, price, tradingPartyName, type);
+            if (currentCompany.updateSellPrice(price)) {
                 isQuoteUpdated = true;
             }
+            currentCompany.addSellOrder(newSellOrder);
+            currentCompany.sortSellOrderList();
         }
 
         if (isQuoteUpdated) {
-            exchange.writeToFile(exchange.getQuote(companyName));
+            exchange.writeToFile(currentCompany);
         }
     }
 

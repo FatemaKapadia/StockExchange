@@ -6,15 +6,11 @@ import java.io.*;
 public class StockExchange {
     private String name;
     private Map<String, Quote> registeredStocks;
-    private ArrayList<Order> Limit, IOC, Market;
 
     // constructor to instantiate new stock exchange
     public StockExchange(String str) {
         name = str;
         registeredStocks = new HashMap<String, Quote>();
-        Limit = new ArrayList<Order>();
-        IOC = new ArrayList<Order>();
-        Market = new ArrayList<Order>();
     }
 
     // method called from main class to start execution

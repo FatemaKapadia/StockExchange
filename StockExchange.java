@@ -60,6 +60,10 @@ public class StockExchange {
         ArrayList<SellOrder> sellOrders = stock.getSellOrdersList();
         ArrayList<BuyOrder> buyOrders = stock.getBuyOrdersList();
         ArrayList<SellOrder> sellOrdersToRemove = new ArrayList<SellOrder>();
+        // Trades are possible in the following scenarios
+        // Market Sell: Market, IOC, Limit Buy
+        // IOC, Limit Sell: Market Buy, IOC and Limit buy if price allows to sell
+        // In case of IOC if no trade possible, delete the order
         for (SellOrder sell : sellOrders) {
             if (buyOrders.size() > 0) {
                 BuyOrder buy = buyOrders.get(0);
@@ -70,39 +74,6 @@ public class StockExchange {
                     } catch (TradeNotPossibleException e) {
                         System.out.println(e.getMessage().toString());
                     }
-                } else if (sell.getType().equals("IOC")) {
-                    if (buy.getType().equals("Market")) {
-                        try {
-                            areTradingPartiesDifferent(buy, sell);
-                            tradeSuccessful(sell, buy, sellOrders, buyOrders, sellOrdersToRemove);
-                        } catch (TradeNotPossibleException e) {
-                            System.out.println(e.getMessage().toString());
-                        }
-                    } else if (buy.getType().equals("IOC")) {
-                        if (buy.getPrice() < sell.getPrice()) {
-                            buyOrders.remove(buy);
-                            sellOrders.remove(sell);
-                        } else {
-                            try {
-                                areTradingPartiesDifferent(buy, sell);
-                                tradeSuccessful(sell, buy, sellOrders, buyOrders, sellOrdersToRemove);
-                            } catch (TradeNotPossibleException e) {
-                                System.out.println(e.getMessage().toString());
-                            }
-                        }
-                    } else {
-                        if (buy.getPrice() < sell.getPrice()) {
-                            sellOrders.remove(sell);
-                        } else {
-                            try {
-                                areTradingPartiesDifferent(buy, sell);
-                                tradeSuccessful(sell, buy, sellOrders, buyOrders, sellOrdersToRemove);
-                            } catch (TradeNotPossibleException e) {
-                                System.out.println(e.getMessage().toString());
-                            }
-                        }
-                    }
-
                 } else {
                     if (buy.getType().equals("Market")) {
                         try {
@@ -132,6 +103,10 @@ public class StockExchange {
                             }
                         }
                     }
+
+                    if(sell.getType() == "IOC" && !sellOrdersToRemove.contains(sell)){
+                        sellOrdersToRemove.add(sell);
+                    }
                 }
             }
         }
@@ -146,11 +121,17 @@ public class StockExchange {
 
     private void tradeSuccessful(SellOrder sell, BuyOrder buy, ArrayList<SellOrder> sellOrders,
             ArrayList<BuyOrder> buyOrders, ArrayList<SellOrder> sellOrdersToRemove) {
-        System.out.println("Trading stock: " + sell.getStockName());
-        System.out.println("Parties involved: ");
-        System.out.println(sell.getTradingPartyName() + " " + sell.getPrice());
-        System.out.println(buy.getTradingPartyName() + " " + buy.getPrice());
+        Trade successfulTrade = new Trade(sell, buy);
+        printDetailsOfTrade(successfulTrade);
         sellOrdersToRemove.add(sell);
         buyOrders.remove(buy);
+    }
+
+    private void printDetailsOfTrade(Trade trade){
+        System.out.println("Trading stock: " + trade.getStockName());
+        System.out.println("Parties involved: ");
+        System.out.println(trade.getSellerTradingPartyName());
+        System.out.println(trade.getBuyerTradingPartyName());
+        System.out.println("Price: " + trade.getPrice());
     }
 }

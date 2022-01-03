@@ -53,6 +53,7 @@ public class FileHandler implements Runnable {
             br.close();
         } catch (Exception e) {
             System.out.println(e.getMessage().toString());
+            System.exit(-1);
         }
         return input;
     }
@@ -80,6 +81,7 @@ public class FileHandler implements Runnable {
                 }
             } catch (NumberFormatException e) {
                 System.out.println(e.getMessage().toString());
+                System.exit(-1);
             }
         }
 
@@ -98,7 +100,7 @@ public class FileHandler implements Runnable {
     private void interpretOrder(String[] instruction) {
         // in case of order instruction, splits the instruction and identify different
         // parts
-        String companyName = instruction[0];
+        String stockName = instruction[0];
         int price = Integer.parseInt(instruction[1]);
         String tradingPartyName = instruction[2];
         String direction = instruction[3];
@@ -107,29 +109,30 @@ public class FileHandler implements Runnable {
         // this variable determines if the quote has been changed
         boolean isQuoteUpdated = false;
 
-        // in case company is not registered, create a new entry in the HashMap
-        exchange.isStockRegistered(companyName);
-        Quote currentCompany = exchange.getQuote(companyName);
+        // in case stock is not registered, create a new entry in the HashMap
+        exchange.isStockRegistered(stockName);
+        Quote stock = exchange.getQuote(stockName);
 
         if (direction.equals("Buy")) {
-            BuyOrder newBuyOrder = new BuyOrder(companyName, price, tradingPartyName, type);
-            if (currentCompany.updateBuyPrice(price)) {
+            BuyOrder newBuyOrder = new BuyOrder(stockName, price, tradingPartyName, type);
+            if (stock.updateBuyPrice(price)) {
                 isQuoteUpdated = true;
             }
-            currentCompany.addBuyOrder(newBuyOrder);
-            currentCompany.sortBuyOrderList();
+            stock.addBuyOrder(newBuyOrder);
+            stock.sortBuyOrderList();
         } else {
-            SellOrder newSellOrder = new SellOrder(companyName, price, tradingPartyName, type);
-            if (currentCompany.updateSellPrice(price)) {
+            SellOrder newSellOrder = new SellOrder(stockName, price, tradingPartyName, type);
+            if (stock.updateSellPrice(price)) {
                 isQuoteUpdated = true;
             }
-            currentCompany.addSellOrder(newSellOrder);
-            currentCompany.sortSellOrderList();
+            stock.addSellOrder(newSellOrder);
+            stock.sortSellOrderList();
         }
 
         if (isQuoteUpdated) {
-            exchange.writeToFile(currentCompany);
+            exchange.writeToFile(stock);
         }
+        exchange.isTradePossible(stock); 
     }
 
 }

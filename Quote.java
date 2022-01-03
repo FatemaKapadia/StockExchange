@@ -12,6 +12,8 @@ public class Quote {
         stockName = name;
         bestBuyPrice = 0;
         bestSellPrice = 0;
+        sellOrders = new ArrayList<SellOrder>();
+        buyOrders = new ArrayList<BuyOrder>();
     }
 
     public boolean updateBuyPrice(int value) {
@@ -45,6 +47,14 @@ public class Quote {
         return bestSellPrice;
     }
 
+    public ArrayList<SellOrder> getSellOrdersList() {
+        return sellOrders;
+    }
+
+    public ArrayList<BuyOrder> getBuyOrdersList() {
+        return buyOrders;
+    }
+
     public void addSellOrder(SellOrder so) {
         sellOrders.add(so);
     }
@@ -53,6 +63,8 @@ public class Quote {
         buyOrders.add(bo);
     }
 
+    // while sorting sell order list orders with lowest price should be processed
+    // first
     public void sortSellOrderList() {
         sellOrders.sort((order1, order2) -> {
             if (order1.getType().equals("Market")) {
@@ -70,6 +82,8 @@ public class Quote {
         });
     }
 
+    // while sorting buy order list orders with higher price should be processed
+    // first
     public void sortBuyOrderList() {
         buyOrders.sort((order1, order2) -> {
             if (order1.getType().equals("Market")) {

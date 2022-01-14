@@ -18,7 +18,7 @@ public class Quote {
 
     public boolean updateBuyPrice(int value) {
         // returns true if the quote changes for a particular company
-        if (value > bestBuyPrice) {
+        if (value < bestBuyPrice) {
             bestBuyPrice = value;
             return true;
         }

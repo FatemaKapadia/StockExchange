@@ -49,7 +49,6 @@ public class StockExchange {
             String str = updatedQuote.getStockName() + " " + updatedQuote.getBestBuyPrice() + " "
                     + updatedQuote.getBestSellPrice() + "\n";
             bw.write(str);
-            System.out.println(str);
             bw.close();
         } catch (Exception e) {
             System.out.println(e.getMessage().toString());
@@ -69,7 +68,7 @@ public class StockExchange {
                 BuyOrder buy = buyOrders.get(0);
                 if (sell.getType().equals("Market")) {
                     try {
-                        areTradingPartiesDifferent(buy, sell);
+                        checkForTradingExceptions(buy, sell);
                         tradeSuccessful(sell, buy, sellOrders, buyOrders, sellOrdersToRemove);
                     } catch (TradeNotPossibleException e) {
                         System.out.println(e.getMessage().toString());
@@ -77,7 +76,7 @@ public class StockExchange {
                 } else {
                     if (buy.getType().equals("Market")) {
                         try {
-                            areTradingPartiesDifferent(buy, sell);
+                            checkForTradingExceptions(buy, sell);
                             tradeSuccessful(sell, buy, sellOrders, buyOrders, sellOrdersToRemove);
                         } catch (TradeNotPossibleException e) {
                             System.out.println(e.getMessage().toString());
@@ -87,7 +86,7 @@ public class StockExchange {
                             buyOrders.remove(buy);
                         } else {
                             try {
-                                areTradingPartiesDifferent(buy, sell);
+                                checkForTradingExceptions(buy, sell);
                                 tradeSuccessful(sell, buy, sellOrders, buyOrders, sellOrdersToRemove);
                             } catch (TradeNotPossibleException e) {
                                 System.out.println(e.getMessage().toString());
@@ -96,7 +95,7 @@ public class StockExchange {
                     } else {
                         if (buy.getPrice() >= sell.getPrice()) {
                             try {
-                                areTradingPartiesDifferent(buy, sell);
+                                checkForTradingExceptions(buy, sell);
                                 tradeSuccessful(sell, buy, sellOrders, buyOrders, sellOrdersToRemove);
                             } catch (TradeNotPossibleException e) {
                                 System.out.println(e.getMessage().toString());
@@ -108,17 +107,30 @@ public class StockExchange {
                         sellOrdersToRemove.add(sell);
                     }
                 }
+            } if(sell.getType() == "IOC"){
+                sellOrdersToRemove.add(sell);
             }
         }
         sellOrders.removeAll(sellOrdersToRemove);
+
+        ArrayList<BuyOrder> buyOrdersToRemove = new ArrayList<BuyOrder>();
+        for (BuyOrder buy: buyOrders) {
+            if(buy.getType() == "IOC"){
+                buyOrdersToRemove.add(buy);
+            }
+        }
+        buyOrders.removeAll(buyOrdersToRemove);
+
     }
 
-    private void areTradingPartiesDifferent(BuyOrder buy, SellOrder sell) throws TradeNotPossibleException {
+    // throws necessary exceptions for an unsuccesful trade, other exceptions can be added here
+    private void checkForTradingExceptions(BuyOrder buy, SellOrder sell) throws TradeNotPossibleException {
         if (buy.getTradingPartyName() == sell.getTradingPartyName()) {
             throw new TradeNotPossibleException("The buying and selling parties are the same");
         }
     }
 
+    // if trade is successful, it makes a new trade object and prints details, also removes concerned orders
     private void tradeSuccessful(SellOrder sell, BuyOrder buy, ArrayList<SellOrder> sellOrders,
             ArrayList<BuyOrder> buyOrders, ArrayList<SellOrder> sellOrdersToRemove) {
         Trade successfulTrade = new Trade(sell, buy);
@@ -127,6 +139,7 @@ public class StockExchange {
         buyOrders.remove(buy);
     }
 
+    // prints details of a successful trade to the console
     private void printDetailsOfTrade(Trade trade){
         System.out.println("Trading stock: " + trade.getStockName());
         System.out.println("Parties involved: ");
